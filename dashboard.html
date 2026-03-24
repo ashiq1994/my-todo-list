@@ -3,84 +3,86 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TaskFlow | My Dashboard</title>
+    <title>TaskFlow | Advanced Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+    <style>
+        .completed-task { text-decoration: line-through; opacity: 0.6; }
+        .fc-event { cursor: pointer; border-radius: 6px; padding: 2px; }
+    </style>
 </head>
 <body class="bg-slate-100 min-h-screen">
 
-    <nav class="bg-white border-b border-slate-200 px-6 py-4 flex justify-between items-center sticky top-0 z-10">
-        <h1 class="text-2xl font-bold text-blue-600">TaskFlow</h1>
+    <nav class="bg-white border-b border-slate-200 px-6 py-4 flex justify-between items-center sticky top-0 z-10 shadow-sm">
+        <h1 class="text-2xl font-bold text-blue-600 italic">TaskFlow</h1>
         <div class="flex items-center gap-4">
-            <span id="user-display" class="text-slate-600 font-medium hidden md:block"></span>
-            <button onclick="handleLogout()" class="bg-red-50 text-red-600 px-4 py-2 rounded-lg font-semibold hover:bg-red-100 transition">Logout</button>
+            <span id="user-display" class="text-slate-600 font-medium hidden md:block text-sm"></span>
+            <button onclick="handleLogout()" class="bg-red-50 text-red-600 px-4 py-2 rounded-xl text-sm font-bold hover:bg-red-100 transition">Logout</button>
         </div>
     </nav>
 
-    <main class="max-w-7xl mx-auto p-4 md:p-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <main class="max-w-7xl mx-auto p-4 md:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
         
-        <div class="lg:col-span-1 space-y-6">
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-                <h2 class="text-xl font-bold text-slate-800 mb-4">Add New Task</h2>
-                <div class="flex flex-col gap-3">
-                    <input type="text" id="todo-input" placeholder="Task description..." class="p-3 bg-slate-50 border rounded-xl outline-none focus:ring-2 focus:ring-blue-500">
-                    <button onclick="addTodo()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition shadow-lg shadow-blue-100">+ Add Task</button>
+        <div class="lg:col-span-4 space-y-6">
+            <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
+                <h2 class="text-lg font-bold text-slate-800 mb-4">Create New Task</h2>
+                <div class="space-y-3">
+                    <input type="text" id="todo-input" placeholder="What needs to be done?" class="w-full p-3 bg-slate-50 border rounded-xl outline-none focus:ring-2 focus:ring-blue-500">
+                    
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">Start Time</label>
+                            <input type="time" id="start-time" class="w-full p-2 bg-slate-50 border rounded-lg text-sm">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-bold text-slate-400 uppercase ml-1">End Time</label>
+                            <input type="time" id="end-time" class="w-full p-2 bg-slate-50 border rounded-lg text-sm">
+                        </div>
+                    </div>
+                    
+                    <button onclick="addTodo()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 transition shadow-lg shadow-blue-100 mt-2">Add to Schedule</button>
                 </div>
             </div>
 
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-                <h2 class="text-xl font-bold text-slate-800 mb-4">My Tasks</h2>
-                <ul id="todo-list" class="space-y-3">
-                    </ul>
+            <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
+                <h2 class="text-lg font-bold text-slate-800 mb-4">My Tasks</h2>
+                <ul id="todo-list" class="space-y-3"></ul>
             </div>
         </div>
 
-        <div class="lg:col-span-2">
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 min-h-[600px]">
+        <div class="lg:col-span-8">
+            <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
                 <div id="calendar"></div>
             </div>
         </div>
-
     </main>
 
     <script>
         const SB_URL = 'https://ktfiockexdvjuduhqixh.supabase.co';
         const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt0ZmlvY2tleGR2anVkdWhxaXhoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQzNjExMjUsImV4cCI6MjA4OTkzNzEyNX0.w_2YABA_lVGrtFukbcpPsZCyeRCGr8iO0U8gjTRbXB8';
         const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
-
         let calendar;
 
-        // --- 1. SESSION CHECK ---
         async function checkUser() {
             const { data: { user } } = await supabaseClient.auth.getUser();
-            if (!user) {
-                window.location.href = "index.html";
-            } else {
-                const name = user.user_metadata.full_name || "User";
-                document.getElementById('user-display').innerText = "Hello, " + name;
+            if (!user) window.location.href = "index.html";
+            else {
+                document.getElementById('user-display').innerText = "Account: " + (user.user_metadata.full_name || user.email);
                 initCalendar();
                 loadTodos();
             }
         }
 
-        // --- 2. CALENDAR SETUP ---
         function initCalendar() {
-            const calendarEl = document.getElementById('calendar');
-            calendar = new FullCalendar.Calendar(calendarEl, {
+            calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
                 initialView: 'dayGridMonth',
-                headerToolbar: {
-                    left: 'prev,next today',
-                    center: 'title',
-                    right: 'dayGridMonth,timeGridWeek'
-                },
-                themeSystem: 'standard',
-                height: 'auto'
+                headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek' },
+                height: '650px'
             });
             calendar.render();
         }
 
-        // --- 3. TASK LOGIC ---
         async function loadTodos() {
             const { data: { user } } = await supabaseClient.auth.getUser();
             const { data: todos, error } = await supabaseClient.from('todos')
@@ -94,34 +96,45 @@
 
         function renderTodos(todos) {
             const list = document.getElementById('todo-list');
-            list.innerHTML = todos.length === 0 ? `<p class="text-slate-400 text-sm italic">No tasks yet.</p>` : "";
-            
+            list.innerHTML = "";
             todos.forEach(todo => {
                 const li = document.createElement('li');
-                li.className = "flex justify-between items-center p-4 bg-slate-50 rounded-xl border border-slate-100 hover:border-blue-200 transition group";
+                const isComp = todo.is_completed;
+                li.className = `flex items-center justify-between p-4 rounded-2xl border transition ${isComp ? 'bg-slate-50 border-slate-200' : 'bg-white border-blue-100 shadow-sm'}`;
+                
                 li.innerHTML = `
-                    <span class="text-slate-700 font-medium">${todo.task}</span>
-                    <button onclick="deleteTodo('${todo.id}')" class="text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition">✕</button>
+                    <div class="flex items-center gap-3">
+                        <input type="checkbox" ${isComp ? 'checked' : ''} onchange="toggleComplete('${todo.id}', ${isComp})" class="w-5 h-5 rounded-full border-blue-300">
+                        <div class="${isComp ? 'completed-task text-slate-400' : 'text-slate-700 font-semibold'}">
+                            <p class="text-sm">${todo.task}</p>
+                            <p class="text-[10px] text-blue-500 font-bold uppercase">${todo.start_time || '--:--'} - ${todo.end_time || '--:--'}</p>
+                        </div>
+                    </div>
+                    <button onclick="deleteTodo('${todo.id}')" class="text-slate-300 hover:text-red-500">✕</button>
                 `;
                 list.appendChild(li);
             });
         }
 
         async function addTodo() {
-            const input = document.getElementById('todo-input');
+            const task = document.getElementById('todo-input').value;
+            const start = document.getElementById('start-time').value;
+            const end = document.getElementById('end-time').value;
             const { data: { user } } = await supabaseClient.auth.getUser();
-            if (!input.value.trim()) return;
 
-            const { error } = await supabaseClient.from('todos').insert([{ 
-                task: input.value, 
-                user_id: user.id 
+            if (!task) return alert("Task name required");
+
+            await supabaseClient.from('todos').insert([{ 
+                task, start_time: start, end_time: end, user_id: user.id, is_completed: false 
             }]);
+            
+            document.getElementById('todo-input').value = "";
+            loadTodos();
+        }
 
-            if (error) alert(error.message);
-            else {
-                input.value = "";
-                loadTodos();
-            }
+        async function toggleComplete(id, currentStatus) {
+            await supabaseClient.from('todos').update({ is_completed: !currentStatus }).eq('id', id);
+            loadTodos();
         }
 
         async function deleteTodo(id) {
@@ -134,10 +147,10 @@
             todos.forEach(todo => {
                 calendar.addEvent({
                     title: todo.task,
-                    start: todo.created_at,
-                    allDay: true,
-                    backgroundColor: '#2563eb', // Blue-600
-                    borderColor: '#2563eb'
+                    start: todo.created_at, // Use custom date column if added
+                    backgroundColor: todo.is_completed ? '#cbd5e1' : '#2563eb',
+                    borderColor: todo.is_completed ? '#94a3b8' : '#1d4ed8',
+                    textColor: todo.is_completed ? '#64748b' : '#ffffff'
                 });
             });
         }
