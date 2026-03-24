@@ -3,53 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TaskFlow | Welcome</title>
+    <title>TaskFlow | Access</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body class="bg-slate-100 min-h-screen flex items-center justify-center p-6">
+<body class="bg-slate-50 min-h-screen flex items-center justify-center p-4 md:p-10">
 
-    <div class="bg-white shadow-2xl rounded-3xl w-full max-w-md overflow-hidden border border-slate-200">
-        <div class="flex border-b">
-            <button id="tab-login" onclick="showTab('login')" class="w-1/2 py-4 font-bold text-blue-600 border-b-2 border-blue-600 bg-white transition">Login</button>
-            <button id="tab-signup" onclick="showTab('signup')" class="w-1/2 py-4 font-bold text-slate-400 hover:text-slate-600 bg-slate-50 transition">Register</button>
-        </div>
-
-        <div class="p-8">
-            <div id="form-login" class="space-y-5">
-                <h2 class="text-xl font-bold text-slate-800">Welcome Back</h2>
-                <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Email</label>
-                    <input type="email" id="login-email" placeholder="email@example.com" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Password</label>
-                    <input type="password" id="login-password" placeholder="••••••••" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
-                </div>
-                <button onclick="handleLogin()" class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-200 transition active:scale-95">Sign In</button>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-5xl">
+        
+        <div class="bg-white p-8 rounded-3xl shadow-xl border border-slate-200 flex flex-col justify-center">
+            <div class="mb-8">
+                <h1 class="text-3xl font-bold text-slate-800">Welcome Back</h1>
+                <p class="text-slate-500">Please enter your details to sign in.</p>
             </div>
 
-            <div id="form-signup" class="hidden space-y-4">
-                <h2 class="text-xl font-bold text-slate-800">Create Account</h2>
+            <div class="space-y-4">
                 <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Full Name</label>
-                    <input type="text" id="reg-name" placeholder="Mohammed Ashiq" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Email Address</label>
+                    <input type="email" id="login-email" placeholder="email@example.com" 
+                        class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition">
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Date of Birth</label>
-                    <input type="date" id="reg-dob" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Password</label>
+                    <input type="password" id="login-password" placeholder="••••••••" 
+                        class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition">
                 </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Email</label>
-                    <input type="email" id="reg-email" placeholder="email@example.com" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Password</label>
-                    <input type="password" id="reg-password" placeholder="Min 6 chars" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
-                </div>
-                <button onclick="handleSignUp()" class="w-full bg-emerald-500 text-white font-bold py-3 rounded-xl hover:bg-emerald-600 shadow-lg shadow-emerald-100 transition active:scale-95">Register Now</button>
+                <button onclick="handleLogin()" 
+                    class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-100 transition active:scale-95 mt-4">
+                    Sign In
+                </button>
             </div>
         </div>
+
+        <div class="bg-blue-600 p-8 rounded-3xl shadow-xl text-white">
+            <div class="mb-8">
+                <h2 class="text-3xl font-bold">New Here?</h2>
+                <p class="text-blue-100">Create an account to manage your tasks.</p>
+            </div>
+
+            <div class="space-y-4 text-slate-800">
+                <div>
+                    <label class="block text-sm font-medium text-blue-50 mb-1">Full Name</label>
+                    <input type="text" id="reg-name" placeholder="Mohammed Ashiq" 
+                        class="w-full p-3 bg-white rounded-xl focus:ring-2 focus:ring-blue-300 outline-none transition border-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-blue-50 mb-1">Date of Birth</label>
+                    <input type="date" id="reg-dob" 
+                        class="w-full p-3 bg-white rounded-xl focus:ring-2 focus:ring-blue-300 outline-none transition border-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-blue-50 mb-1">Email ID</label>
+                    <input type="email" id="reg-email" placeholder="name@example.com" 
+                        class="w-full p-3 bg-white rounded-xl focus:ring-2 focus:ring-blue-300 outline-none transition border-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-blue-50 mb-1">Password</label>
+                    <input type="password" id="reg-password" placeholder="Min. 6 chars" 
+                        class="w-full p-3 bg-white rounded-xl focus:ring-2 focus:ring-blue-300 outline-none transition border-none">
+                </div>
+                <button onclick="handleSignUp()" 
+                    class="w-full bg-white text-blue-600 font-bold py-4 rounded-xl hover:bg-blue-50 transition active:scale-95 mt-4 shadow-md">
+                    Register Now
+                </button>
+            </div>
+        </div>
+
     </div>
 
     <script>
@@ -57,49 +76,32 @@
         const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt0ZmlvY2tleGR2anVkdWhxaXhoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQzNjExMjUsImV4cCI6MjA4OTkzNzEyNX0.w_2YABA_lVGrtFukbcpPsZCyeRCGr8iO0U8gjTRbXB8';
         const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
 
-        // --- Tab Switching Logic ---
-        function showTab(type) {
-            const loginForm = document.getElementById('form-login');
-            const signupForm = document.getElementById('form-signup');
-            const loginTab = document.getElementById('tab-login');
-            const signupTab = document.getElementById('tab-signup');
-
-            if (type === 'login') {
-                loginForm.classList.remove('hidden');
-                signupForm.classList.add('hidden');
-                loginTab.className = "w-1/2 py-4 font-bold text-blue-600 border-b-2 border-blue-600 bg-white transition";
-                signupTab.className = "w-1/2 py-4 font-bold text-slate-400 bg-slate-50 transition";
-            } else {
-                loginForm.classList.add('hidden');
-                signupForm.classList.remove('hidden');
-                signupTab.className = "w-1/2 py-4 font-bold text-emerald-600 border-b-2 border-emerald-500 bg-white transition";
-                loginTab.className = "w-1/2 py-4 font-bold text-slate-400 bg-slate-50 transition";
-            }
-        }
-
-        // --- Sign Up Logic ---
+        // --- Signup Function ---
         async function handleSignUp() {
             const email = document.getElementById('reg-email').value;
             const password = document.getElementById('reg-password').value;
             const fullName = document.getElementById('reg-name').value;
             const dob = document.getElementById('reg-dob').value;
 
-            if (!email || !password || !fullName || !dob) return alert("Please fill all fields");
+            if (!email || !password || !fullName || !dob) return alert("All fields are required!");
 
-            const { error } = await supabaseClient.auth.signUp({
+            const { data, error } = await supabaseClient.auth.signUp({
                 email, password, options: { data: { full_name: fullName, dob: dob } }
             });
 
             if (error) alert(error.message);
-            else alert("Account created! You can now switch to the Login tab.");
+            else alert("Account created! You can now use the Sign In box.");
         }
 
-        // --- Login Logic ---
+        // --- Login Function ---
         async function handleLogin() {
             const email = document.getElementById('login-email').value;
             const password = document.getElementById('login-password').value;
 
-            const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+            if (!email || !password) return alert("Enter email and password!");
+
+            const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+            
             if (error) alert(error.message);
             else window.location.href = "dashboard.html";
         }
