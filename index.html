@@ -3,111 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TaskFlow | To-Do List</title>
-    
+    <title>TaskFlow | Login</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center">
+
+    <div class="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
+        <h1 class="text-2xl font-bold mb-6 text-center text-blue-600">TaskFlow</h1>
+        <div class="space-y-4">
+            <input type="email" id="email" placeholder="Email" class="w-full p-2 border rounded">
+            <input type="password" id="password" placeholder="Password (6+ chars)" class="w-full p-2 border rounded">
+            <button onclick="handleLogin()" class="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700">Login</button>
+            <button onclick="handleSignUp()" class="w-full bg-gray-200 text-gray-700 p-2 rounded hover:bg-gray-300">Create Account</button>
+        </div>
+    </div>
 
     <script>
-        // Initialize Supabase immediately after the library is loaded
         const SB_URL = 'https://ktfiockexdvjuduhqixh.supabase.co';
         const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt0ZmlvY2tleGR2anVkdWhxaXhoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQzNjExMjUsImV4cCI6MjA4OTkzNzEyNX0.w_2YABA_lVGrtFukbcpPsZCyeRCGr8iO0U8gjTRbXB8';
-        
-        // This variable is now safe to create because the library is loaded above
         const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
 
-        // --- Auth Functions ---
         async function handleSignUp() {
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
-            if (!email || !password) return alert("Enter email and password");
+            if (!email || !password) return alert("Please fill in both fields.");
 
             const { error } = await supabaseClient.auth.signUp({ email, password });
             if (error) alert(error.message);
-            else alert("Success! You can now login.");
+            else alert("Account created! You can now login.");
         }
 
         async function handleLogin() {
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
 
-            const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+            const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
             if (error) alert(error.message);
             else {
-                switchScreen('todo-screen');
-                loadTodos();
+                // If login works, go to the dashboard page
+                window.location.href = "dashboard.html";
             }
         }
-
-        async function handleLogout() {
-            await supabaseClient.auth.signOut();
-            switchScreen('auth-screen');
-        }
-
-        // --- Screen Logic ---
-        function switchScreen(screenId) {
-            document.getElementById('auth-screen').classList.toggle('hidden', screenId !== 'auth-screen');
-            document.getElementById('todo-screen').classList.toggle('hidden', screenId !== 'todo-screen');
-        }
-
-        // --- Todo Logic ---
-        async function loadTodos() {
-            const { data: { user } } = await supabaseClient.auth.getUser();
-            const { data: todos, error } = await supabaseClient.from('todos')
-                .select('*').eq('user_id', user.id).order('created_at', { ascending: false });
-            if (!error) renderTodos(todos);
-        }
-
-        async function addTodo() {
-            const input = document.getElementById('todo-input');
-            const { data: { user } } = await supabaseClient.auth.getUser();
-            if (!input.value.trim()) return;
-
-            await supabaseClient.from('todos').insert([{ task: input.value, user_id: user.id }]);
-            input.value = "";
-            loadTodos();
-        }
-
-        function renderTodos(todos) {
-            const list = document.getElementById('todo-list');
-            list.innerHTML = "";
-            todos.forEach(todo => {
-                const li = document.createElement('li');
-                li.className = "flex justify-between p-3 bg-gray-50 rounded border mb-2";
-                li.innerHTML = `<span>${todo.task}</span><button onclick="deleteTodo('${todo.id}')" class="text-red-500">✕</button>`;
-                list.appendChild(li);
-            });
-        }
-
-        async function deleteTodo(id) {
-            await supabaseClient.from('todos').delete().eq('id', id);
-            loadTodos();
-        }
     </script>
-</head>
-<body class="bg-gray-100 min-h-screen flex items-center justify-center">
-
-    <div id="auth-screen" class="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
-        <h1 class="text-2xl font-bold mb-6 text-center text-blue-600">TaskFlow</h1>
-        <div class="space-y-4">
-            <input type="email" id="email" placeholder="Email" class="w-full p-2 border rounded">
-            <input type="password" id="password" placeholder="Password (6+ chars)" class="w-full p-2 border rounded">
-            <button onclick="handleLogin()" class="w-full bg-blue-600 text-white p-2 rounded">Login</button>
-            <button onclick="handleSignUp()" class="w-full bg-gray-200 p-2 rounded">Create Account</button>
-        </div>
-    </div>
-
-    <div id="todo-screen" class="hidden bg-white p-8 rounded-lg shadow-md w-full max-w-xl">
-        <div class="flex justify-between items-center mb-6">
-            <h2 class="text-xl font-bold">My Tasks</h2>
-            <button onclick="handleLogout()" class="text-red-500 text-sm">Logout</button>
-        </div>
-        <div class="flex gap-2 mb-4">
-            <input type="text" id="todo-input" placeholder="New Task" class="flex-1 p-2 border rounded">
-            <button onclick="addTodo()" class="bg-blue-600 text-white px-4 rounded">+</button>
-        </div>
-        <ul id="todo-list"></ul>
-    </div>
-
 </body>
 </html>

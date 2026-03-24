@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskFlow | Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-gray-100 min-h-screen p-4">
+
+    <div class="max-w-xl mx-auto bg-white p-8 rounded-lg shadow-md mt-10">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-xl font-bold text-blue-600">My Tasks</h2>
+            <button onclick="handleLogout()" class="text-red-500 text-sm hover:underline">Logout</button>
+        </div>
+
+        <div class="flex gap-2 mb-6">
+            <input type="text" id="todo-input" placeholder="What needs to be done?" class="flex-1 p-2 border rounded">
+            <button onclick="addTodo()" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">+</button>
+        </div>
+
+        <ul id="todo-list" class="space-y-2"></ul>
+    </div>
+
+    <script>
+        const SB_URL = 'https://ktfiockexdvjuduhqixh.supabase.co';
+        const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt0ZmlvY2tleGR2anVkdWhxaXhoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQzNjExMjUsImV4cCI6MjA4OTkzNzEyNX0.w_2YABA_lVGrtFukbcpPsZCyeRCGr8iO0U8gjTRbXB8';
+        const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
+
+        // Check if user is actually logged in
+        async function checkUser() {
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            if (!user) {
+                window.location.href = "index.html"; // Send back to login if not authenticated
+            } else {
+                loadTodos();
+            }
+        }
+
+        async function handleLogout() {
+            await supabaseClient.auth.signOut();
+            window.location.href = "index.html";
+        }
+
+        async function loadTodos() {
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            const { data: todos, error } = await supabaseClient.from('todos')
+                .select('*').eq('user_id', user.id).order('created_at', { ascending: false });
+            if (!error) renderTodos(todos);
+        }
+
+        async function addTodo() {
+            const input = document.getElementById('todo-input');
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            if (!input.value.trim()) return;
+
+            await supabaseClient.from('todos').insert([{ task: input.value, user_id: user.id }]);
+            input.value = "";
+            loadTodos();
+        }
+
+        function renderTodos(todos) {
+            const list = document.getElementById('todo-list');
+            list.innerHTML = "";
+            todos.forEach(todo => {
+                const li = document.createElement('li');
+                li.className = "flex justify-between items-center p-3 bg-gray-50 rounded border";
+                li.innerHTML = `<span>${todo.task}</span><button onclick="deleteTodo('${todo.id}')" class="text-red-400">✕</button>`;
+                list.appendChild(li);
+            });
+        }
+
+        async function deleteTodo(id) {
+            await supabaseClient.from('todos').delete().eq('id', id);
+            loadTodos();
+        }
+
+        // Run this when the page opens
+        checkUser();
+    </script>
+</body>
+</html>
