@@ -3,176 +3,127 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TaskFlow | Supabase</title>
+    <title>TaskFlow | To-Do List</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-        .glass { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
-        .hidden-screen { display: none; }
-        .loader { border-top-color: #6366f1; animation: spinner 1.5s linear infinite; }
-        @keyframes spinner { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    </style>
 </head>
-<body class="bg-gradient-to-br from-slate-900 to-indigo-900 min-h-screen flex items-center justify-center p-4 font-sans text-slate-800">
+<body class="bg-gray-100 min-h-screen flex items-center justify-center font-sans">
 
-    <div id="loginScreen" class="glass p-8 rounded-2xl shadow-2xl w-full max-w-md border border-white/20">
-        <h2 class="text-3xl font-extrabold text-center text-indigo-600 mb-2">Welcome Back</h2>
-        <p class="text-center text-slate-500 mb-8 text-sm">Log in to manage your tasks</p>
-        
+    <div id="auth-screen" class="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
+        <h1 class="text-2xl font-bold mb-6 text-center text-blue-600">TaskFlow Login</h1>
         <div class="space-y-4">
-            <input type="email" id="loginEmail" placeholder="Email Address" class="w-full p-4 border rounded-xl focus:ring-2 focus:ring-indigo-400 outline-none transition">
-            <input type="password" id="loginPass" placeholder="Password" class="w-full p-4 border rounded-xl focus:ring-2 focus:ring-indigo-400 outline-none transition">
-            <button onclick="handleLogin()" id="loginBtn" class="w-full bg-indigo-600 text-white p-4 rounded-xl font-bold hover:bg-indigo-700 transform active:scale-95 transition">Login</button>
+            <input type="email" id="email" placeholder="Email" class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400">
+            <input type="password" id="password" placeholder="Password (min 6 chars)" class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400">
+            <button onclick="handleLogin()" class="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 transition">Login</button>
+            <button onclick="handleSignUp()" class="w-full bg-gray-200 text-gray-700 p-2 rounded hover:bg-gray-300 transition">Create Account</button>
         </div>
-        
-        <p class="text-center mt-6 text-sm text-slate-600">
-            Don't have an account? <button onclick="switchScreen('signup')" class="text-indigo-600 font-bold hover:underline">Create Account</button>
-        </p>
     </div>
 
-    <div id="signupScreen" class="glass p-8 rounded-2xl shadow-2xl w-full max-w-md border border-white/20 hidden-screen">
-        <h2 class="text-3xl font-extrabold text-center text-emerald-600 mb-2">Join TaskFlow</h2>
-        <p class="text-center text-slate-500 mb-8 text-sm">Free forever task management</p>
-        
-        <div class="space-y-4">
-            <input type="email" id="signupEmail" placeholder="Email Address" class="w-full p-4 border rounded-xl focus:ring-2 focus:ring-emerald-400 outline-none transition">
-            <input type="password" id="signupPass" placeholder="Create Password" class="w-full p-4 border rounded-xl focus:ring-2 focus:ring-emerald-400 outline-none transition">
-            <button onclick="handleSignUp()" id="signupBtn" class="w-full bg-emerald-500 text-white p-4 rounded-xl font-bold hover:bg-emerald-600 transform active:scale-95 transition">Sign Up</button>
+    <div id="todo-screen" class="hidden bg-white p-8 rounded-lg shadow-md w-full max-w-xl">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-2xl font-bold text-blue-600">My Tasks</h1>
+            <button onclick="handleLogout()" class="text-sm text-red-500 hover:underline">Logout</button>
         </div>
         
-        <p class="text-center mt-6 text-sm text-slate-600">
-            Already a member? <button onclick="switchScreen('login')" class="text-indigo-600 font-bold hover:underline">Login here</button>
-        </p>
-    </div>
-
-    <div id="appScreen" class="glass p-8 rounded-2xl shadow-2xl w-full max-w-2xl border border-white/20 hidden-screen">
-        <div class="flex justify-between items-center mb-8">
-            <div>
-                <h2 class="text-2xl font-bold text-slate-900">My Dashboard</h2>
-                <p id="userDisplay" class="text-xs text-indigo-500 font-medium"></p>
-            </div>
-            <button onclick="handleLogout()" class="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg text-sm font-bold hover:bg-red-100 hover:text-red-600 transition">Logout</button>
+        <div class="flex gap-2 mb-6">
+            <input type="text" id="todo-input" placeholder="What needs to be done?" class="flex-1 p-2 border rounded">
+            <button onclick="addTodo()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">+</button>
         </div>
 
-        <div class="flex gap-3 mb-8">
-            <input type="text" id="taskInput" placeholder="Add a new task..." class="flex-1 p-4 border rounded-xl outline-none focus:ring-2 focus:ring-indigo-400">
-            <button onclick="addTask()" class="bg-indigo-600 text-white px-8 rounded-xl font-bold hover:bg-indigo-700">+</button>
-        </div>
-
-        <ul id="taskList" class="space-y-3 max-h-[400px] overflow-y-auto pr-2">
+        <ul id="todo-list" class="space-y-2">
             </ul>
     </div>
 
     <script>
-        // --- CONFIGURATION ---
+        // --- 1. INITIALIZE SUPABASE ---
         const SB_URL = 'https://ktfiockexdvjuduhqixh.supabase.co';
-        const SB_KEY = 'sb_publishable_d28Z4z6qdCvdf4UT86aMiQ_EOYdg-42';
-        c// --- CONFIGURATION ---
-const SB_URL = 'https://ktfiockexdvjuduhqixh.supabase.co';
-const SB_KEY = 'YOUR_PUBLIC_ANON_KEY'; // Ensure this is your "anon/public" key
+        const SB_KEY = 'YOUR_SUPABASE_ANON_KEY'; // <--- REPLACE THIS KEY
+        
+        // We use 'supabaseClient' to avoid conflict with the library name
+        const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
 
-// FIX: Remove 'const' from 'const supabase' if you already loaded the library
-// OR simply use a different variable name to avoid the conflict:
-const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
+        // --- 2. SCREEN SWITCHER ---
+        function switchScreen(screenId) {
+            document.getElementById('auth-screen').classList.add('hidden');
+            document.getElementById('todo-screen').classList.add('hidden');
+            document.getElementById(screenId).classList.remove('hidden');
+        }
 
-        // --- AUTH LOGIC ---
+        // --- 3. AUTHENTICATION FUNCTIONS ---
         async function handleSignUp() {
-            const email = document.getElementById('signupEmail').value;
-            const password = document.getElementById('signupPass').value;
-            if(!email || !password) return alert("Fill all fields");
-
-            const { error } = await supabase.auth.signUp({ email, password });
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const { error } = await supabaseClient.auth.signUp({ email, password });
+            
             if (error) alert(error.message);
-            else alert("Check your email for confirmation!");
+            else alert("Account created! You can now login.");
         }
 
         async function handleLogin() {
-            const email = document.getElementById('loginEmail').value;
-            const password = document.getElementById('loginPass').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
             
-            const { data, error } = await supabase.auth.signInWithPassword({ email, password });
             if (error) alert(error.message);
             else {
-                switchScreen('app');
-                initApp();
+                switchScreen('todo-screen');
+                loadTodos();
             }
         }
 
         async function handleLogout() {
-            await supabase.auth.signOut();
-            location.reload();
+            await supabaseClient.auth.signOut();
+            switchScreen('auth-screen');
         }
 
-        // --- DATABASE LOGIC ---
-        async function initApp() {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (user) {
-                document.getElementById('userDisplay').innerText = user.email;
-                fetchTasks(user.id);
-            }
-        }
-
-        async function fetchTasks(userId) {
-            const { data, error } = await supabase.from('todos')
+        // --- 4. TODO FUNCTIONS ---
+        async function loadTodos() {
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            const { data: todos, error } = await supabaseClient.from('todos')
                 .select('*')
-                .eq('user_id', userId)
+                .eq('user_id', user.id)
                 .order('created_at', { ascending: false });
-            
-            if (!error) renderTasks(data);
+
+            if (error) console.error(error);
+            else renderTodos(todos);
         }
 
-        async function addTask() {
-            const input = document.getElementById('taskInput');
-            const { data: { user } } = await supabase.auth.getUser();
-            
-            if (input.value.trim()) {
-                const { error } = await supabase.from('todos').insert([
-                    { task: input.value, user_id: user.id }
-                ]);
-                if (!error) {
-                    input.value = '';
-                    fetchTasks(user.id);
-                }
+        async function addTodo() {
+            const input = document.getElementById('todo-input');
+            const { data: { user } } = await supabaseClient.auth.getUser();
+
+            if (input.value.trim() === "") return;
+
+            const { error } = await supabaseClient.from('todos').insert([
+                { task: input.value, user_id: user.id }
+            ]);
+
+            if (error) alert(error.message);
+            else {
+                input.value = "";
+                loadTodos();
             }
         }
 
-        async function deleteTask(id) {
-            const { data: { user } } = await supabase.auth.getUser();
-            await supabase.from('todos').delete().eq('id', id);
-            fetchTasks(user.id);
-        }
-
-        // --- UI HELPERS ---
-        function switchScreen(screen) {
-            document.getElementById('loginScreen').classList.add('hidden-screen');
-            document.getElementById('signupScreen').classList.add('hidden-screen');
-            document.getElementById('appScreen').classList.add('hidden-screen');
-            
-            document.getElementById(screen + 'Screen').classList.remove('hidden-screen');
-        }
-
-        function renderTasks(todos) {
-            const list = document.getElementById('taskList');
-            list.innerHTML = todos.length ? '' : '<p class="text-center text-slate-400 py-10">No tasks yet. Add one above!</p>';
-            todos.forEach(t => {
+        function renderTodos(todos) {
+            const list = document.getElementById('todo-list');
+            list.innerHTML = "";
+            todos.forEach(todo => {
                 const li = document.createElement('li');
-                li.className = "flex justify-between items-center bg-white p-4 rounded-xl border border-slate-100 shadow-sm hover:shadow-md transition";
+                li.className = "flex justify-between items-center p-3 bg-gray-50 rounded border";
                 li.innerHTML = `
-                    <span class="text-slate-700 font-medium">${t.task}</span>
-                    <button onclick="deleteTask('${t.id}')" class="text-slate-300 hover:text-red-500 transition">✕</button>
+                    <span>${todo.task}</span>
+                    <button onclick="deleteTodo('${todo.id}')" class="text-red-400 hover:text-red-600">✕</button>
                 `;
                 list.appendChild(li);
             });
         }
 
-        // Check session on load
-        window.onload = async () => {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (session) {
-                switchScreen('app');
-                initApp();
-            }
-        };
+        async function deleteTodo(id) {
+            const { error } = await supabaseClient.from('todos').delete().eq('id', id);
+            if (error) alert(error.message);
+            else loadTodos();
+        }
     </script>
 </body>
 </html>
