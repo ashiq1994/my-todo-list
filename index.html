@@ -67,7 +67,13 @@
         // --- CONFIGURATION ---
         const SB_URL = 'https://ktfiockexdvjuduhqixh.supabase.co';
         const SB_KEY = 'sb_publishable_d28Z4z6qdCvdf4UT86aMiQ_EOYdg-42';
-        const supabase = supabase.createClient(SB_URL, SB_KEY);
+        c// --- CONFIGURATION ---
+const SB_URL = 'https://ktfiockexdvjuduhqixh.supabase.co';
+const SB_KEY = 'YOUR_PUBLIC_ANON_KEY'; // Ensure this is your "anon/public" key
+
+// FIX: Remove 'const' from 'const supabase' if you already loaded the library
+// OR simply use a different variable name to avoid the conflict:
+const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
 
         // --- AUTH LOGIC ---
         async function handleSignUp() {
