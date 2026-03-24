@@ -30,16 +30,14 @@
             <button onclick="addTodo()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">+</button>
         </div>
 
-        <ul id="todo-list" class="space-y-2">
-            </ul>
+        <ul id="todo-list" class="space-y-2"></ul>
     </div>
 
     <script>
-        // --- 1. INITIALIZE SUPABASE ---
+        // --- 1. INITIALIZE ---
         const SB_URL = 'https://ktfiockexdvjuduhqixh.supabase.co';
-        const SB_KEY = 'YOUR_SUPABASE_ANON_KEY'; // <--- REPLACE THIS KEY
+        const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt0ZmlvY2tleGR2anVkdWhxaXhoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQzNjExMjUsImV4cCI6MjA4OTkzNzEyNX0.w_2YABA_lVGrtFukbcpPsZCyeRCGr8iO0U8gjTRbXB8';
         
-        // We use 'supabaseClient' to avoid conflict with the library name
         const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
 
         // --- 2. SCREEN SWITCHER ---
@@ -49,21 +47,19 @@
             document.getElementById(screenId).classList.remove('hidden');
         }
 
-        // --- 3. AUTHENTICATION FUNCTIONS ---
+        // --- 3. AUTH FUNCTIONS ---
         async function handleSignUp() {
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             const { error } = await supabaseClient.auth.signUp({ email, password });
-            
             if (error) alert(error.message);
-            else alert("Account created! You can now login.");
+            else alert("Success! You can now login.");
         }
 
         async function handleLogin() {
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
-            const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-            
+            const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
             if (error) alert(error.message);
             else {
                 switchScreen('todo-screen');
@@ -84,25 +80,16 @@
                 .eq('user_id', user.id)
                 .order('created_at', { ascending: false });
 
-            if (error) console.error(error);
-            else renderTodos(todos);
+            if (!error) renderTodos(todos);
         }
 
         async function addTodo() {
             const input = document.getElementById('todo-input');
             const { data: { user } } = await supabaseClient.auth.getUser();
+            if (!input.value.trim()) return;
 
-            if (input.value.trim() === "") return;
-
-            const { error } = await supabaseClient.from('todos').insert([
-                { task: input.value, user_id: user.id }
-            ]);
-
-            if (error) alert(error.message);
-            else {
-                input.value = "";
-                loadTodos();
-            }
+            const { error } = await supabaseClient.from('todos').insert([{ task: input.value, user_id: user.id }]);
+            if (!error) { input.value = ""; loadTodos(); }
         }
 
         function renderTodos(todos) {
@@ -111,18 +98,14 @@
             todos.forEach(todo => {
                 const li = document.createElement('li');
                 li.className = "flex justify-between items-center p-3 bg-gray-50 rounded border";
-                li.innerHTML = `
-                    <span>${todo.task}</span>
-                    <button onclick="deleteTodo('${todo.id}')" class="text-red-400 hover:text-red-600">✕</button>
-                `;
+                li.innerHTML = `<span>${todo.task}</span><button onclick="deleteTodo('${todo.id}')" class="text-red-400">✕</button>`;
                 list.appendChild(li);
             });
         }
 
         async function deleteTodo(id) {
-            const { error } = await supabaseClient.from('todos').delete().eq('id', id);
-            if (error) alert(error.message);
-            else loadTodos();
+            await supabaseClient.from('todos').delete().eq('id', id);
+            loadTodos();
         }
     </script>
 </body>
