@@ -1,112 +1,130 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TaskFlow | To-Do List</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-</head>
-<body class="bg-gray-100 min-h-screen flex items-center justify-center font-sans">
+<script>
+    // --- 1. INITIALIZE SUPABASE ---
+    // Using your specific Project URL and the cleaned Anon Key (no backslashes)
+    const SB_URL = 'https://ktfiockexdvjuduhqixh.supabase.co';
+    const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt0ZmlvY2tleGR2anVkdWhxaXhoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQzNjExMjUsImV4cCI6MjA4OTkzNzEyNX0.w_2YABA_lVGrtFukbcpPsZCyeRCGr8iO0U8gjTRbXB8';
+    
+    // We use 'supabaseClient' to avoid conflict with the global 'supabase' library object
+    const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
 
-    <div id="auth-screen" class="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
-        <h1 class="text-2xl font-bold mb-6 text-center text-blue-600">TaskFlow Login</h1>
-        <div class="space-y-4">
-            <input type="email" id="email" placeholder="Email" class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400">
-            <input type="password" id="password" placeholder="Password (min 6 chars)" class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-400">
-            <button onclick="handleLogin()" class="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 transition">Login</button>
-            <button onclick="handleSignUp()" class="w-full bg-gray-200 text-gray-700 p-2 rounded hover:bg-gray-300 transition">Create Account</button>
-        </div>
-    </div>
-
-    <div id="todo-screen" class="hidden bg-white p-8 rounded-lg shadow-md w-full max-w-xl">
-        <div class="flex justify-between items-center mb-6">
-            <h1 class="text-2xl font-bold text-blue-600">My Tasks</h1>
-            <button onclick="handleLogout()" class="text-sm text-red-500 hover:underline">Logout</button>
-        </div>
+    // --- 2. SCREEN SWITCHER ---
+    function switchScreen(screenId) {
+        const authScreen = document.getElementById('auth-screen');
+        const todoScreen = document.getElementById('todo-screen');
         
-        <div class="flex gap-2 mb-6">
-            <input type="text" id="todo-input" placeholder="What needs to be done?" class="flex-1 p-2 border rounded">
-            <button onclick="addTodo()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">+</button>
-        </div>
-
-        <ul id="todo-list" class="space-y-2"></ul>
-    </div>
-
-    <script>
-        // --- 1. INITIALIZE ---
-        const SB_URL = 'https://ktfiockexdvjuduhqixh.supabase.co';
-        const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt0ZmlvY2tleGR2anVkdWhxaXhoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQzNjExMjUsImV4cCI6MjA4OTkzNzEyNX0.w_2YABA_lVGrtFukbcpPsZCyeRCGr8iO0U8gjTRbXB8';
-        
-        const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
-
-        // --- 2. SCREEN SWITCHER ---
-        function switchScreen(screenId) {
-            document.getElementById('auth-screen').classList.add('hidden');
-            document.getElementById('todo-screen').classList.add('hidden');
-            document.getElementById(screenId).classList.remove('hidden');
+        if (screenId === 'todo-screen') {
+            authScreen.classList.add('hidden');
+            todoScreen.classList.remove('hidden');
+        } else {
+            authScreen.classList.remove('hidden');
+            todoScreen.classList.add('hidden');
         }
+    }
 
-        // --- 3. AUTH FUNCTIONS ---
-        async function handleSignUp() {
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const { error } = await supabaseClient.auth.signUp({ email, password });
-            if (error) alert(error.message);
-            else alert("Success! You can now login.");
+    // --- 3. AUTHENTICATION FUNCTIONS ---
+    async function handleSignUp() {
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+
+        if (!email || !password) return alert("Please enter both email and password.");
+
+        const { data, error } = await supabaseClient.auth.signUp({
+            email: email,
+            password: password
+        });
+
+        if (error) {
+            alert("Error: " + error.message);
+        } else {
+            alert("Success! You can now log in.");
         }
+    }
 
-        async function handleLogin() {
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
-            if (error) alert(error.message);
-            else {
-                switchScreen('todo-screen');
-                loadTodos();
-            }
-        }
+    async function handleLogin() {
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
 
-        async function handleLogout() {
-            await supabaseClient.auth.signOut();
-            switchScreen('auth-screen');
-        }
+        const { data, error } = await supabaseClient.auth.signInWithPassword({
+            email: email,
+            password: password
+        });
 
-        // --- 4. TODO FUNCTIONS ---
-        async function loadTodos() {
-            const { data: { user } } = await supabaseClient.auth.getUser();
-            const { data: todos, error } = await supabaseClient.from('todos')
-                .select('*')
-                .eq('user_id', user.id)
-                .order('created_at', { ascending: false });
-
-            if (!error) renderTodos(todos);
-        }
-
-        async function addTodo() {
-            const input = document.getElementById('todo-input');
-            const { data: { user } } = await supabaseClient.auth.getUser();
-            if (!input.value.trim()) return;
-
-            const { error } = await supabaseClient.from('todos').insert([{ task: input.value, user_id: user.id }]);
-            if (!error) { input.value = ""; loadTodos(); }
-        }
-
-        function renderTodos(todos) {
-            const list = document.getElementById('todo-list');
-            list.innerHTML = "";
-            todos.forEach(todo => {
-                const li = document.createElement('li');
-                li.className = "flex justify-between items-center p-3 bg-gray-50 rounded border";
-                li.innerHTML = `<span>${todo.task}</span><button onclick="deleteTodo('${todo.id}')" class="text-red-400">✕</button>`;
-                list.appendChild(li);
-            });
-        }
-
-        async function deleteTodo(id) {
-            await supabaseClient.from('todos').delete().eq('id', id);
+        if (error) {
+            alert("Login Failed: " + error.message);
+        } else {
+            switchScreen('todo-screen');
             loadTodos();
         }
-    </script>
-</body>
-</html>
+    }
+
+    async function handleLogout() {
+        await supabaseClient.auth.signOut();
+        switchScreen('auth-screen');
+    }
+
+    // --- 4. TODO FUNCTIONS ---
+    async function loadTodos() {
+        const { data: { user } } = await supabaseClient.auth.getUser();
+        if (!user) return;
+
+        const { data: todos, error } = await supabaseClient
+            .from('todos')
+            .select('*')
+            .eq('user_id', user.id)
+            .order('created_at', { ascending: false });
+
+        if (error) {
+            console.error("Error loading todos:", error.message);
+        } else {
+            renderTodos(todos);
+        }
+    }
+
+    async function addTodo() {
+        const input = document.getElementById('todo-input');
+        const { data: { user } } = await supabaseClient.auth.getUser();
+
+        if (!input.value.trim() || !user) return;
+
+        const { error } = await supabaseClient
+            .from('todos')
+            .insert([{ task: input.value, user_id: user.id }]);
+
+        if (error) {
+            alert("Error saving task: " + error.message);
+        } else {
+            input.value = "";
+            loadTodos();
+        }
+    }
+
+    function renderTodos(todos) {
+        const list = document.getElementById('todo-list');
+        list.innerHTML = "";
+        
+        todos.forEach(todo => {
+            const li = document.createElement('li');
+            li.className = "flex justify-between items-center p-3 bg-gray-50 rounded border mb-2 shadow-sm";
+            li.innerHTML = `
+                <span class="text-gray-700">${todo.task}</span>
+                <button onclick="deleteTodo('${todo.id}')" class="text-red-400 hover:text-red-600 transition">
+                    ✕
+                </button>
+            `;
+            list.appendChild(li);
+        });
+    }
+
+    async function deleteTodo(id) {
+        const { error } = await supabaseClient
+            .from('todos')
+            .delete()
+            .eq('id', id);
+
+        if (error) {
+            alert("Error deleting task: " + error.message);
+        } else {
+            loadTodos();
+        }
+    }
+</script>
