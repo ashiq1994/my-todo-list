@@ -3,72 +3,85 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TaskFlow | Access</title>
+    <title>TaskFlow | Professional Efficiency</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root { --primary: #4f46e5; }
+        body { 
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); 
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Glassmorphism Auth Card */
+        .auth-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 32px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.08);
+        }
+
+        .input-group:focus-within label { color: var(--primary); }
+        .btn-gradient {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            transition: all 0.3s ease;
+        }
+        .btn-gradient:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -5px rgba(79, 70, 229, 0.4);
+        }
+    </style>
 </head>
-<body class="bg-slate-50 min-h-screen flex items-center justify-center p-4 md:p-10">
+<body class="p-4">
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-5xl">
-        
-        <div class="bg-white p-8 rounded-3xl shadow-xl border border-slate-200 flex flex-col justify-center">
-            <div class="mb-8">
-                <h1 class="text-3xl font-bold text-slate-800">Welcome Back</h1>
-                <p class="text-slate-500">Please enter your details to sign in.</p>
+    <div class="max-w-md w-full space-y-8 text-center">
+        <div class="space-y-4">
+            <div class="w-20 h-20 bg-indigo-600 rounded-3xl mx-auto flex items-center justify-center text-white shadow-2xl shadow-indigo-200 rotate-3">
+                <span class="font-black text-4xl italic">T</span>
             </div>
-
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Email Address</label>
-                    <input type="email" id="login-email" placeholder="email@example.com" 
-                        class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Password</label>
-                    <input type="password" id="login-password" placeholder="••••••••" 
-                        class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition">
-                </div>
-                <button onclick="handleLogin()" 
-                    class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-100 transition active:scale-95 mt-4">
-                    Sign In
-                </button>
+            <div>
+                <h1 class="text-4xl font-black text-slate-900 tracking-tight">TaskFlow <span class="text-indigo-600">Pro</span></h1>
+                <p class="text-slate-500 font-medium">Precision task management for elites.</p>
             </div>
         </div>
 
-        <div class="bg-blue-600 p-8 rounded-3xl shadow-xl text-white">
-            <div class="mb-8">
-                <h2 class="text-3xl font-bold">New Here?</h2>
-                <p class="text-blue-100">Create an account to manage your tasks.</p>
+        <div class="auth-card p-8 md:p-10 space-y-6">
+            <div class="space-y-2">
+                <h2 id="auth-title" class="text-2xl font-bold text-slate-800">Welcome Back</h2>
+                <p id="auth-subtitle" class="text-sm text-slate-500">Enter your credentials to access your workspace.</p>
             </div>
 
-            <div class="space-y-4 text-slate-800">
-                <div>
-                    <label class="block text-sm font-medium text-blue-50 mb-1">Full Name</label>
-                    <input type="text" id="reg-name" placeholder="Mohammed Ashiq" 
-                        class="w-full p-3 bg-white rounded-xl focus:ring-2 focus:ring-blue-300 outline-none transition border-none">
+            <div class="space-y-4 text-left">
+                <div class="input-group space-y-1">
+                    <label class="text-[10px] font-black uppercase text-slate-400 ml-4 tracking-widest">Work Email</label>
+                    <input type="email" id="email" placeholder="name@company.com" 
+                        class="w-full p-4 bg-white/50 border border-slate-200 rounded-2xl outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all font-medium">
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-blue-50 mb-1">Date of Birth</label>
-                    <input type="date" id="reg-dob" 
-                        class="w-full p-3 bg-white rounded-xl focus:ring-2 focus:ring-blue-300 outline-none transition border-none">
+                <div class="input-group space-y-1">
+                    <label class="text-[10px] font-black uppercase text-slate-400 ml-4 tracking-widest">Security Token</label>
+                    <input type="password" id="password" placeholder="••••••••" 
+                        class="w-full p-4 bg-white/50 border border-slate-200 rounded-2xl outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all font-medium">
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-blue-50 mb-1">Email ID</label>
-                    <input type="email" id="reg-email" placeholder="name@example.com" 
-                        class="w-full p-3 bg-white rounded-xl focus:ring-2 focus:ring-blue-300 outline-none transition border-none">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-blue-50 mb-1">Password</label>
-                    <input type="password" id="reg-password" placeholder="Min. 6 chars" 
-                        class="w-full p-3 bg-white rounded-xl focus:ring-2 focus:ring-blue-300 outline-none transition border-none">
-                </div>
-                <button onclick="handleSignUp()" 
-                    class="w-full bg-white text-blue-600 font-bold py-4 rounded-xl hover:bg-blue-50 transition active:scale-95 mt-4 shadow-md">
-                    Register Now
-                </button>
+            </div>
+
+            <button id="main-btn" onclick="handleAuth()" 
+                class="btn-gradient w-full text-white font-black py-4 rounded-2xl uppercase tracking-widest text-sm shadow-lg shadow-indigo-100">
+                Enter Workspace
+            </button>
+
+            <div class="pt-4 border-t border-slate-100">
+                <p class="text-xs text-slate-500">
+                    <span id="toggle-text">New to TaskFlow?</span> 
+                    <button onclick="toggleAuth()" id="toggle-btn" class="text-indigo-600 font-bold hover:underline ml-1">Create Account</button>
+                </p>
             </div>
         </div>
 
+        <p class="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em]">Secure Access • v2.0.1 PRO</p>
     </div>
 
     <script>
@@ -76,35 +89,46 @@
         const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt0ZmlvY2tleGR2anVkdWhxaXhoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQzNjExMjUsImV4cCI6MjA4OTkzNzEyNX0.w_2YABA_lVGrtFukbcpPsZCyeRCGr8iO0U8gjTRbXB8';
         const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
 
-        // --- Signup Function ---
-        async function handleSignUp() {
-            const email = document.getElementById('reg-email').value;
-            const password = document.getElementById('reg-password').value;
-            const fullName = document.getElementById('reg-name').value;
-            const dob = document.getElementById('reg-dob').value;
+        let isLogin = true;
 
-            if (!email || !password || !fullName || !dob) return alert("All fields are required!");
-
-            const { data, error } = await supabaseClient.auth.signUp({
-                email, password, options: { data: { full_name: fullName, dob: dob } }
-            });
-
-            if (error) alert(error.message);
-            else alert("Account created! You can now use the Sign In box.");
+        function toggleAuth() {
+            isLogin = !isLogin;
+            document.getElementById('auth-title').innerText = isLogin ? 'Welcome Back' : 'Get Started';
+            document.getElementById('auth-subtitle').innerText = isLogin ? 'Enter your credentials to access your workspace.' : 'Create your pro account to start managing tasks.';
+            document.getElementById('main-btn').innerText = isLogin ? 'Enter Workspace' : 'Deploy Account';
+            document.getElementById('toggle-text').innerText = isLogin ? 'New to TaskFlow?' : 'Already a member?';
+            document.getElementById('toggle-btn').innerText = isLogin ? 'Create Account' : 'Sign In';
         }
 
-        // --- Login Function ---
-        async function handleLogin() {
-            const email = document.getElementById('login-email').value;
-            const password = document.getElementById('login-password').value;
+        async function handleAuth() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const btn = document.getElementById('main-btn');
 
-            if (!email || !password) return alert("Enter email and password!");
-
-            const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+            if(!email || !password) return alert("Please fill all fields");
             
-            if (error) alert(error.message);
-            else window.location.href = "dashboard.html";
+            btn.innerText = "Processing...";
+            btn.disabled = true;
+
+            const { data, error } = isLogin 
+                ? await supabaseClient.auth.signInWithPassword({ email, password })
+                : await supabaseClient.auth.signUp({ email, password });
+
+            if (error) {
+                alert(error.message);
+                btn.innerText = isLogin ? 'Enter Workspace' : 'Deploy Account';
+                btn.disabled = false;
+            } else {
+                window.location.href = "dashboard.html";
+            }
         }
+
+        // Check if already logged in
+        async function checkSession() {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (session) window.location.href = "dashboard.html";
+        }
+        checkSession();
     </script>
 </body>
 </html>
