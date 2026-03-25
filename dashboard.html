@@ -23,7 +23,10 @@
             <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white font-black text-xl shadow-lg">T</div>
             <h1 class="text-xl font-bold tracking-tight text-slate-800">TaskFlow</h1>
         </div>
-        <button onclick="handleLogout()" class="bg-slate-100 text-slate-600 px-4 py-2 rounded-xl text-sm font-bold hover:bg-red-50 transition-all">Logout</button>
+        <div class="flex items-center gap-4">
+            <span id="user-display" class="text-xs font-bold text-slate-500"></span>
+            <button onclick="handleLogout()" class="bg-slate-100 text-slate-600 px-4 py-2 rounded-xl text-sm font-bold hover:bg-red-50 transition-all">Logout</button>
+        </div>
     </nav>
 
     <main class="max-w-7xl mx-auto p-4 md:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -32,9 +35,9 @@
             <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
                 <h2 class="text-[10px] font-black uppercase text-slate-400 mb-4 tracking-widest italic">Flag Management</h2>
                 <div class="flex gap-2 mb-4">
-                    <input type="text" id="new-cat-name" placeholder="Flag Name..." class="flex-1 p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none">
+                    <input type="text" id="new-cat-name" placeholder="Flag Name..." class="flex-1 p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500">
                     <input type="color" id="new-cat-color" value="#2563eb" class="w-12 h-12 p-1 bg-white border border-slate-200 rounded-xl cursor-pointer">
-                    <button onclick="createCategory()" class="bg-slate-800 text-white px-5 rounded-xl font-bold">+</button>
+                    <button onclick="createCategory()" class="bg-slate-800 text-white px-5 rounded-xl font-bold hover:bg-black transition">+</button>
                 </div>
                 <div id="category-tags" class="flex flex-wrap gap-2"></div>
             </div>
@@ -42,27 +45,28 @@
             <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
                 <h2 class="text-[10px] font-black uppercase text-slate-400 mb-4 tracking-widest italic">Schedule Task</h2>
                 <div class="space-y-4">
-                    <input type="text" id="todo-input" placeholder="Task description..." class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500">
+                    <input type="text" id="todo-input" placeholder="What's the task?" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500">
+                    
                     <select id="category-select" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none cursor-pointer"></select>
 
                     <div class="grid grid-cols-2 gap-3">
                         <div>
-                            <label class="text-[9px] font-bold text-slate-400 ml-1">START DATE</label>
+                            <label class="text-[9px] font-bold text-slate-400 ml-1 uppercase">Date From</label>
                             <input type="date" id="date-from" class="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl text-xs">
                         </div>
                         <div>
-                            <label class="text-[9px] font-bold text-slate-400 ml-1">END DATE</label>
+                            <label class="text-[9px] font-bold text-slate-400 ml-1 uppercase">Date To</label>
                             <input type="date" id="date-to" class="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl text-xs">
                         </div>
                     </div>
 
                     <div class="grid grid-cols-2 gap-3">
                         <div>
-                            <label class="text-[9px] font-bold text-slate-400 ml-1">START TIME</label>
+                            <label class="text-[9px] font-bold text-slate-400 ml-1 uppercase">Start Time</label>
                             <input type="time" id="start-time" class="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl text-xs">
                         </div>
                         <div>
-                            <label class="text-[9px] font-bold text-slate-400 ml-1">END TIME</label>
+                            <label class="text-[9px] font-bold text-slate-400 ml-1 uppercase">End Time</label>
                             <input type="time" id="end-time" class="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl text-xs">
                         </div>
                     </div>
@@ -74,15 +78,15 @@
             <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
                 <div class="flex justify-between items-center mb-4">
                     <h2 class="font-bold text-slate-800 italic text-sm">Task List</h2>
-                    <input type="text" id="search-bar" onkeyup="filterTasks()" placeholder="Search..." class="p-2 text-xs border border-slate-200 rounded-xl w-1/2 outline-none">
+                    <input type="text" id="search-bar" onkeyup="filterTasks()" placeholder="Search tasks..." class="p-2 text-xs border border-slate-200 rounded-xl w-1/2 outline-none">
                 </div>
-                <ul id="todo-list" class="space-y-3 max-h-[350px] overflow-y-auto pr-2"></ul>
+                <ul id="todo-list" class="space-y-3 max-h-[300px] overflow-y-auto pr-2"></ul>
             </div>
         </div>
 
         <div class="lg:col-span-8">
             <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
-                <div id="calendar"></div>
+                <div id="calendar" class="min-h-[700px]"></div>
             </div>
         </div>
     </main>
@@ -97,6 +101,7 @@
         async function init() {
             const { data: { user } } = await supabaseClient.auth.getUser();
             if (!user) return window.location.href = "index.html";
+            document.getElementById('user-display').innerText = user.email;
             
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('date-from').value = today;
@@ -127,12 +132,12 @@
             tags.innerHTML = "";
             categoriesList.forEach(cat => {
                 select.innerHTML += `<option value="${cat.name}">${cat.name}</option>`;
-                tags.innerHTML += `<span class="px-2 py-1 rounded-lg text-[10px] font-black text-white flex items-center gap-2" style="background: ${cat.color}">${cat.name.toUpperCase()} <button onclick="deleteCategory('${cat.id}')">×</button></span>`;
+                tags.innerHTML += `<span class="px-2 py-1 rounded-lg text-[10px] font-black text-white flex items-center gap-2 shadow-sm" style="background: ${cat.color}">${cat.name.toUpperCase()} <button onclick="deleteCategory('${cat.id}')">×</button></span>`;
             });
         }
 
         async function createCategory() {
-            const name = document.getElementById('new-cat-name').value;
+            const name = document.getElementById('new-cat-name').value.trim();
             const color = document.getElementById('new-cat-color').value;
             const { data: { user } } = await supabaseClient.auth.getUser();
             if (!name) return;
@@ -159,27 +164,26 @@
                 li.className = "task-item p-4 rounded-2xl border bg-white flex justify-between items-center border-slate-100 shadow-sm";
                 li.setAttribute('data-task', todo.task.toLowerCase());
                 
-                // DISPLAYING THE TIME IN THE LIST UI
                 li.innerHTML = `
                     <div class="flex items-center gap-3">
-                        <input type="checkbox" ${isDone ? 'checked' : ''} onchange="toggleStatus('${todo.id}', ${isDone})" class="w-4 h-4">
+                        <input type="checkbox" ${isDone ? 'checked' : ''} onchange="toggleStatus('${todo.id}', ${isDone})" class="w-4 h-4 cursor-pointer">
                         <div class="${isDone ? 'completed-task' : ''}">
                             <div class="flex items-center gap-2">
                                 <span class="category-dot" style="background: ${catInfo.color}"></span>
                                 <p class="text-sm font-bold text-slate-700">${todo.task}</p>
                             </div>
                             <p class="text-[9px] text-blue-500 font-bold uppercase tracking-tighter">
-                                ${todo.date_from} to ${todo.date_to} | ${todo.start_time || '--'} - ${todo.end_time || '--'}
+                                ${todo.date_from} TO ${todo.date_to} | ${todo.start_time || '--'} - ${todo.end_time || '--'}
                             </p>
                         </div>
                     </div>
-                    <button onclick="deleteTask('${todo.id}')" class="text-slate-300 hover:text-red-500">✕</button>`;
+                    <button onclick="deleteTask('${todo.id}')" class="text-slate-200 hover:text-red-500 transition">✕</button>`;
                 list.appendChild(li);
 
                 let endDate = new Date(todo.date_to);
                 endDate.setDate(endDate.getDate() + 1);
                 calendar.addEvent({
-                    title: `[${todo.category}] ${todo.task} (${todo.start_time || ''})`,
+                    title: `[${todo.category}] ${todo.task}`,
                     start: todo.date_from,
                     end: endDate.toISOString().split('T')[0],
                     backgroundColor: isDone ? '#cbd5e1' : catInfo.color,
@@ -197,7 +201,7 @@
             const tEnd = document.getElementById('end-time').value;
             const { data: { user } } = await supabaseClient.auth.getUser();
 
-            if (!task) return alert("Task required");
+            if (!task) return alert("Task name required");
 
             await supabaseClient.from('todos').insert([{ 
                 task, category, date_from: dFrom, date_to: dTo, 
@@ -222,7 +226,7 @@
         }
 
         async function deleteTask(id) {
-            if (confirm("Delete task?")) { await supabaseClient.from('todos').delete().eq('id', id); loadTodos(); }
+            if (confirm("Delete?")) { await supabaseClient.from('todos').delete().eq('id', id); loadTodos(); }
         }
 
         async function deleteCategory(id) {
