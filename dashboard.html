@@ -9,13 +9,36 @@
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
+        /* FIX: Prevent calendar cells from stretching */
+        .fc .fc-daygrid-day-frame {
+            min-height: 100px !important;
+            max-height: 100px !important;
+            overflow: hidden;
+        }
+
+        /* FIX: Slim task bars for a professional look */
+        .fc-daygrid-event {
+            margin: 1px 2px !important;
+            padding: 2px 4px !important;
+            font-size: 0.7rem !important;
+            border-radius: 4px !important;
+            border: none !important;
+        }
+
+        /* FIX: Style the "+ more" link */
+        .fc-daygrid-more-link {
+            font-size: 10px !important;
+            font-weight: 800 !important;
+            color: #4f46e5 !important;
+            text-transform: uppercase;
+        }
+
         .completed-task { text-decoration: line-through; opacity: 0.5; filter: grayscale(1); }
-        .fc-event { cursor: pointer; border: none !important; padding: 4px 8px; font-weight: 700; border-radius: 8px; font-size: 0.85rem; }
         .category-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
         .progress-fill { transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
-        canvas { max-height: 180px !important; }
+        canvas { max-height: 160px !important; }
     </style>
 </head>
 <body class="bg-[#f8fafc] min-h-screen font-sans text-slate-900">
@@ -36,7 +59,7 @@
         <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
             <div class="flex justify-between items-end mb-2">
                 <div>
-                    <h2 class="text-[10px] font-black uppercase text-slate-400 tracking-widest italic">Success Goal</h2>
+                    <h2 class="text-[10px] font-black uppercase text-slate-400 tracking-widest italic">Daily Goal Progress</h2>
                     <p id="progress-text" class="text-3xl font-black text-slate-800">0%</p>
                 </div>
                 <p id="task-count-text" class="text-[10px] font-bold text-slate-400 uppercase">0 / 0 Completed</p>
@@ -77,7 +100,7 @@
 
                 <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
                     <div class="flex justify-between items-center mb-4">
-                        <h2 class="font-bold text-slate-800 italic text-sm">List</h2>
+                        <h2 class="font-bold text-slate-800 italic text-sm">Tasks</h2>
                         <input type="text" id="search-bar" onkeyup="filterTasks()" placeholder="Search..." class="p-2 text-xs border border-slate-200 rounded-xl w-1/2 outline-none">
                     </div>
                     <ul id="todo-list" class="space-y-3 max-h-[300px] overflow-y-auto pr-2"></ul>
@@ -87,11 +110,11 @@
             <div class="lg:col-span-8 space-y-6">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
-                        <h2 class="text-[10px] font-black uppercase text-slate-400 mb-4 text-center italic">Completion</h2>
+                        <h2 class="text-[10px] font-black uppercase text-slate-400 mb-4 text-center italic">Completion Status</h2>
                         <canvas id="statusChart"></canvas>
                     </div>
                     <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
-                        <h2 class="text-[10px] font-black uppercase text-slate-400 mb-4 text-center italic">Activity</h2>
+                        <h2 class="text-[10px] font-black uppercase text-slate-400 mb-4 text-center italic">Activity by Flag</h2>
                         <canvas id="categoryChart"></canvas>
                     </div>
                 </div>
@@ -121,7 +144,6 @@
             await loadTodos();
         }
 
-        // AUTO-RESET LOGIC
         function resetForm() {
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('todo-input').value = "";
@@ -132,11 +154,17 @@
             document.getElementById('category-select').selectedIndex = 0;
         }
 
+        // FIX: Setup with resizing prevention logic
         function setupCalendar() {
-            calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
+            const calendarEl = document.getElementById('calendar');
+            calendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'dayGridMonth',
                 headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek' },
-                height: 'auto', eventDisplay: 'block'
+                height: 600,             // Fixed height
+                dayMaxEvents: 2,          // Limits stretch by hiding extra events
+                eventDisplay: 'block',
+                expandRows: true,         // Keeps row sizes equal
+                handleWindowResize: true
             });
             calendar.render();
         }
