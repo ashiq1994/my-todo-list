@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TaskFlow | Professional Efficiency</title>
+    <title>TaskFlow | Professional Access</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
@@ -16,55 +16,70 @@
             justify-content: center;
         }
 
-        /* Glassmorphism Auth Card */
         .auth-card {
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.5);
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
             border-radius: 32px;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.08);
         }
 
-        .input-group:focus-within label { color: var(--primary); }
         .btn-gradient {
             background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
+
         .btn-gradient:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 20px -5px rgba(79, 70, 229, 0.4);
+            box-shadow: 0 12px 24px -6px rgba(79, 70, 229, 0.4);
+        }
+
+        .input-pro {
+            background: rgba(255, 255, 255, 0.5);
+            border: 1px solid #e2e8f0;
+            transition: all 0.2s ease;
+        }
+
+        .input-pro:focus {
+            background: white;
+            border-color: #4f46e5;
+            ring: 4px rgba(79, 70, 229, 0.1);
         }
     </style>
 </head>
 <body class="p-4">
 
-    <div class="max-w-md w-full space-y-8 text-center">
-        <div class="space-y-4">
+    <div class="max-w-md w-full space-y-8">
+        <div class="text-center space-y-4">
             <div class="w-20 h-20 bg-indigo-600 rounded-3xl mx-auto flex items-center justify-center text-white shadow-2xl shadow-indigo-200 rotate-3">
                 <span class="font-black text-4xl italic">T</span>
             </div>
-            <div>
-                <h1 class="text-4xl font-black text-slate-900 tracking-tight">TaskFlow <span class="text-indigo-600">Pro</span></h1>
-                <p class="text-slate-500 font-medium">Precision task management for elites.</p>
-            </div>
+            <h1 class="text-4xl font-black text-slate-900 tracking-tight">TaskFlow <span class="text-indigo-600">Pro</span></h1>
         </div>
 
         <div class="auth-card p-8 md:p-10 space-y-6">
-            <div class="space-y-2">
+            <div class="text-center space-y-1">
                 <h2 id="auth-title" class="text-2xl font-bold text-slate-800">Welcome Back</h2>
-                <p id="auth-subtitle" class="text-sm text-slate-500">Enter your credentials to access your workspace.</p>
+                <p id="auth-subtitle" class="text-sm text-slate-500 font-medium">Access your professional workspace.</p>
             </div>
 
-            <div class="space-y-4 text-left">
-                <div class="input-group space-y-1">
-                    <label class="text-[10px] font-black uppercase text-slate-400 ml-4 tracking-widest">Work Email</label>
-                    <input type="email" id="email" placeholder="name@company.com" 
-                        class="w-full p-4 bg-white/50 border border-slate-200 rounded-2xl outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all font-medium">
+            <div class="space-y-4">
+                <div id="name-group" class="hidden space-y-1">
+                    <label class="text-[10px] font-black uppercase text-slate-400 ml-4 tracking-widest">Full Name</label>
+                    <input type="text" id="full-name" placeholder="Enter your name" 
+                        class="input-pro w-full p-4 rounded-2xl outline-none font-medium text-slate-700">
                 </div>
-                <div class="input-group space-y-1">
+
+                <div class="space-y-1">
+                    <label class="text-[10px] font-black uppercase text-slate-400 ml-4 tracking-widest">Work Email</label>
+                    <input type="email" id="email" placeholder="name@work.com" 
+                        class="input-pro w-full p-4 rounded-2xl outline-none font-medium text-slate-700">
+                </div>
+
+                <div class="space-y-1">
                     <label class="text-[10px] font-black uppercase text-slate-400 ml-4 tracking-widest">Security Token</label>
                     <input type="password" id="password" placeholder="••••••••" 
-                        class="w-full p-4 bg-white/50 border border-slate-200 rounded-2xl outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all font-medium">
+                        class="input-pro w-full p-4 rounded-2xl outline-none font-medium text-slate-700">
                 </div>
             </div>
 
@@ -73,15 +88,13 @@
                 Enter Workspace
             </button>
 
-            <div class="pt-4 border-t border-slate-100">
-                <p class="text-xs text-slate-500">
+            <div class="pt-4 text-center border-t border-slate-100">
+                <p class="text-xs text-slate-500 font-medium">
                     <span id="toggle-text">New to TaskFlow?</span> 
-                    <button onclick="toggleAuth()" id="toggle-btn" class="text-indigo-600 font-bold hover:underline ml-1">Create Account</button>
+                    <button onclick="toggleAuth()" id="toggle-btn" class="text-indigo-600 font-black hover:underline ml-1">Create Account</button>
                 </p>
             </div>
         </div>
-
-        <p class="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em]">Secure Access • v2.0.1 PRO</p>
     </div>
 
     <script>
@@ -93,37 +106,61 @@
 
         function toggleAuth() {
             isLogin = !isLogin;
+            const nameGroup = document.getElementById('name-group');
+            
+            // UI Toggle Logic
+            nameGroup.classList.toggle('hidden', isLogin);
             document.getElementById('auth-title').innerText = isLogin ? 'Welcome Back' : 'Get Started';
-            document.getElementById('auth-subtitle').innerText = isLogin ? 'Enter your credentials to access your workspace.' : 'Create your pro account to start managing tasks.';
+            document.getElementById('auth-subtitle').innerText = isLogin ? 'Access your professional workspace.' : 'Create your pro account today.';
             document.getElementById('main-btn').innerText = isLogin ? 'Enter Workspace' : 'Deploy Account';
             document.getElementById('toggle-text').innerText = isLogin ? 'New to TaskFlow?' : 'Already a member?';
             document.getElementById('toggle-btn').innerText = isLogin ? 'Create Account' : 'Sign In';
+            
+            // Reset fields on toggle to keep it clean
+            clearFields();
+        }
+
+        function clearFields() {
+            document.getElementById('email').value = "";
+            document.getElementById('password').value = "";
+            document.getElementById('full-name').value = "";
         }
 
         async function handleAuth() {
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
+            const fullName = document.getElementById('full-name').value;
             const btn = document.getElementById('main-btn');
 
-            if(!email || !password) return alert("Please fill all fields");
+            if (!email || !password) return alert("Please fill all required fields");
             
             btn.innerText = "Processing...";
             btn.disabled = true;
 
             const { data, error } = isLogin 
                 ? await supabaseClient.auth.signInWithPassword({ email, password })
-                : await supabaseClient.auth.signUp({ email, password });
+                : await supabaseClient.auth.signUp({ 
+                    email, 
+                    password,
+                    options: { data: { full_name: fullName } }
+                });
 
             if (error) {
-                alert(error.message);
+                alert(error.message); // This will catch "User already registered"
+                clearFields(); // Fix: Clear all fields after an error to reset the form
                 btn.innerText = isLogin ? 'Enter Workspace' : 'Deploy Account';
                 btn.disabled = false;
             } else {
-                window.location.href = "dashboard.html";
+                if (!isLogin && data.user) {
+                    alert("Account registered successfully! You can now sign in.");
+                    clearFields(); // Fix: Clear fields after successful registration
+                    toggleAuth(); // Auto-switch to login mode
+                } else {
+                    window.location.href = "dashboard.html";
+                }
             }
         }
 
-        // Check if already logged in
         async function checkSession() {
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (session) window.location.href = "dashboard.html";
