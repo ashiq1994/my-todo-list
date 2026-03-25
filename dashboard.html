@@ -7,6 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         .completed-task { text-decoration: line-through; opacity: 0.5; filter: grayscale(1); }
         .fc-event { cursor: pointer; border: none !important; padding: 4px 8px; font-weight: 700; border-radius: 8px; font-size: 0.85rem; }
@@ -14,6 +15,8 @@
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
         input[type="date"], input[type="time"], select { color-scheme: light; }
+        canvas { max-height: 180px !important; }
+        .progress-fill { transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
     </style>
 </head>
 <body class="bg-[#f8fafc] min-h-screen font-sans text-slate-900">
@@ -29,64 +32,74 @@
         </div>
     </nav>
 
-    <main class="max-w-7xl mx-auto p-4 md:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
+    <main class="max-w-7xl mx-auto p-4 md:p-8 space-y-8">
         
-        <div class="lg:col-span-4 space-y-6">
-            <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
-                <h2 class="text-[10px] font-black uppercase text-slate-400 mb-4 tracking-widest italic">Flag Management</h2>
-                <div class="flex gap-2 mb-4">
-                    <input type="text" id="new-cat-name" placeholder="Flag Name..." class="flex-1 p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none">
-                    <input type="color" id="new-cat-color" value="#2563eb" class="w-12 h-12 p-1 bg-white border border-slate-200 rounded-xl cursor-pointer">
-                    <button onclick="createCategory()" class="bg-slate-800 text-white px-5 rounded-xl font-bold">+</button>
+        <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
+            <div class="flex justify-between items-end mb-2">
+                <div>
+                    <h2 class="text-[10px] font-black uppercase text-slate-400 tracking-widest italic">Daily Goal Progress</h2>
+                    <p id="progress-text" class="text-2xl font-black text-slate-800">0%</p>
                 </div>
-                <div id="category-tags" class="flex flex-wrap gap-2"></div>
+                <p id="task-count-text" class="text-xs font-bold text-slate-400 uppercase">0 / 0 Tasks Completed</p>
             </div>
-
-            <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
-                <h2 class="text-[10px] font-black uppercase text-slate-400 mb-4 tracking-widest italic">Schedule Task</h2>
-                <div class="space-y-4">
-                    <input type="text" id="todo-input" placeholder="What's the task?" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500">
-                    
-                    <select id="category-select" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none cursor-pointer"></select>
-
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="text-[9px] font-bold text-slate-400 ml-1 uppercase">Date From</label>
-                            <input type="date" id="date-from" class="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl text-xs">
-                        </div>
-                        <div>
-                            <label class="text-[9px] font-bold text-slate-400 ml-1 uppercase">Date To</label>
-                            <input type="date" id="date-to" class="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl text-xs">
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="text-[9px] font-bold text-slate-400 ml-1 uppercase">Start Time</label>
-                            <input type="time" id="start-time" class="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl text-xs">
-                        </div>
-                        <div>
-                            <label class="text-[9px] font-bold text-slate-400 ml-1 uppercase">End Time</label>
-                            <input type="time" id="end-time" class="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl text-xs">
-                        </div>
-                    </div>
-
-                    <button onclick="addTodo()" class="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl shadow-xl shadow-blue-100 hover:bg-blue-700 transition active:scale-95">Create Schedule</button>
-                </div>
-            </div>
-
-            <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="font-bold text-slate-800 italic text-sm">Task List</h2>
-                    <input type="text" id="search-bar" onkeyup="filterTasks()" placeholder="Search..." class="p-2 text-xs border border-slate-200 rounded-xl w-1/2 outline-none">
-                </div>
-                <ul id="todo-list" class="space-y-3 max-h-[300px] overflow-y-auto pr-2"></ul>
+            <div class="w-full h-4 bg-slate-100 rounded-full overflow-hidden">
+                <div id="progress-bar" class="progress-fill h-full bg-gradient-to-r from-blue-500 to-indigo-600 w-0"></div>
             </div>
         </div>
 
-        <div class="lg:col-span-8">
-            <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
-                <div id="calendar" class="min-h-[700px]"></div>
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <div class="lg:col-span-4 space-y-6">
+                <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
+                    <h2 class="text-[10px] font-black uppercase text-slate-400 mb-4 tracking-widest italic">Flag Management</h2>
+                    <div class="flex gap-2 mb-4">
+                        <input type="text" id="new-cat-name" placeholder="Flag Name..." class="flex-1 p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none">
+                        <input type="color" id="new-cat-color" value="#2563eb" class="w-12 h-12 p-1 bg-white border border-slate-200 rounded-xl cursor-pointer">
+                        <button onclick="createCategory()" class="bg-slate-800 text-white px-5 rounded-xl font-bold">+</button>
+                    </div>
+                    <div id="category-tags" class="flex flex-wrap gap-2"></div>
+                </div>
+
+                <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
+                    <h2 class="text-[10px] font-black uppercase text-slate-400 mb-4 tracking-widest italic">Schedule Task</h2>
+                    <div class="space-y-4">
+                        <input type="text" id="todo-input" placeholder="What's the task?" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500">
+                        <select id="category-select" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none"></select>
+                        <div class="grid grid-cols-2 gap-3">
+                            <input type="date" id="date-from" class="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl text-xs">
+                            <input type="date" id="date-to" class="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl text-xs">
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <input type="time" id="start-time" class="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl text-xs">
+                            <input type="time" id="end-time" class="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl text-xs">
+                        </div>
+                        <button onclick="addTodo()" class="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl shadow-xl shadow-blue-100 hover:bg-blue-700 transition active:scale-95">Create Schedule</button>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="font-bold text-slate-800 italic text-sm">Task List</h2>
+                        <input type="text" id="search-bar" onkeyup="filterTasks()" placeholder="Search..." class="p-2 text-xs border border-slate-200 rounded-xl w-1/2 outline-none">
+                    </div>
+                    <ul id="todo-list" class="space-y-3 max-h-[300px] overflow-y-auto pr-2"></ul>
+                </div>
+            </div>
+
+            <div class="lg:col-span-8 space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
+                        <h2 class="text-[10px] font-black uppercase text-slate-400 mb-4 tracking-widest italic text-center">Completion Status</h2>
+                        <canvas id="statusChart"></canvas>
+                    </div>
+                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
+                        <h2 class="text-[10px] font-black uppercase text-slate-400 mb-4 tracking-widest italic text-center">Tasks per Flag</h2>
+                        <canvas id="categoryChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
+                    <div id="calendar" class="min-h-[500px]"></div>
+                </div>
             </div>
         </div>
     </main>
@@ -95,7 +108,7 @@
         const SB_URL = 'https://ktfiockexdvjuduhqixh.supabase.co';
         const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt0ZmlvY2tleGR2anVkdWhxaXhoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQzNjExMjUsImV4cCI6MjA4OTkzNzEyNX0.w_2YABA_lVGrtFukbcpPsZCyeRCGr8iO0U8gjTRbXB8';
         const supabaseClient = supabase.createClient(SB_URL, SB_KEY);
-        let calendar;
+        let calendar, statusChart, categoryChart;
         let categoriesList = [];
 
         async function init() {
@@ -109,7 +122,6 @@
             await loadTodos();
         }
 
-        // --- RESET LOGIC ---
         function resetForm() {
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('todo-input').value = "";
@@ -124,8 +136,7 @@
             calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
                 initialView: 'dayGridMonth',
                 headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek' },
-                height: 'auto',
-                eventDisplay: 'block'
+                height: 'auto', eventDisplay: 'block'
             });
             calendar.render();
         }
@@ -140,38 +151,62 @@
             tags.innerHTML = "";
             categoriesList.forEach(cat => {
                 select.innerHTML += `<option value="${cat.name}">${cat.name}</option>`;
-                tags.innerHTML += `<span class="px-2 py-1 rounded-lg text-[10px] font-black text-white flex items-center gap-2 shadow-sm" style="background: ${cat.color}">${cat.name.toUpperCase()} <button onclick="deleteCategory('${cat.id}')">×</button></span>`;
+                tags.innerHTML += `<span class="px-2 py-1 rounded-lg text-[10px] font-black text-white flex items-center gap-2" style="background: ${cat.color}">${cat.name.toUpperCase()} <button onclick="deleteCategory('${cat.id}')">×</button></span>`;
             });
-        }
-
-        async function createCategory() {
-            const name = document.getElementById('new-cat-name').value.trim();
-            const color = document.getElementById('new-cat-color').value;
-            const { data: { user } } = await supabaseClient.auth.getUser();
-            if (!name) return;
-            await supabaseClient.from('categories').insert([{ name, color, user_id: user.id }]);
-            document.getElementById('new-cat-name').value = "";
-            loadCategories();
         }
 
         async function loadTodos() {
             const { data: { user } } = await supabaseClient.auth.getUser();
             const { data: todos } = await supabaseClient.from('todos').select('*').eq('user_id', user.id).order('date_from', { ascending: true });
             renderUI(todos || []);
+            updateAnalytics(todos || []);
+        }
+
+        function updateAnalytics(todos) {
+            const completed = todos.filter(t => t.is_completed).length;
+            const total = todos.length;
+            const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+            // Update Progress Bar
+            document.getElementById('progress-bar').style.width = `${percentage}%`;
+            document.getElementById('progress-text').innerText = `${percentage}%`;
+            document.getElementById('task-count-text').innerText = `${completed} / ${total} Tasks Completed`;
+
+            // Update Status Chart
+            if (statusChart) statusChart.destroy();
+            statusChart = new Chart(document.getElementById('statusChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Done', 'Pending'],
+                    datasets: [{ data: [completed, total - completed], backgroundColor: ['#10b981', '#f1f5f9'], borderWidth: 0 }]
+                },
+                options: { cutout: '70%', plugins: { legend: { position: 'bottom' } } }
+            });
+
+            // Update Bar Chart
+            const catCounts = {};
+            todos.forEach(t => catCounts[t.category] = (catCounts[t.category] || 0) + 1);
+            if (categoryChart) categoryChart.destroy();
+            categoryChart = new Chart(document.getElementById('categoryChart'), {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(catCounts),
+                    datasets: [{ label: 'Tasks', data: Object.values(catCounts), backgroundColor: '#6366f1', borderRadius: 6 }]
+                },
+                options: { scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }, plugins: { legend: { display: false } } }
+            });
         }
 
         function renderUI(todos) {
             const list = document.getElementById('todo-list');
             list.innerHTML = "";
             calendar.removeAllEvents();
-
             todos.forEach(todo => {
                 const catInfo = categoriesList.find(c => c.name === todo.category) || { color: '#2563eb' };
                 const isDone = todo.is_completed;
                 const li = document.createElement('li');
-                li.className = "task-item p-4 rounded-2xl border bg-white flex justify-between items-center border-slate-100 shadow-sm transition hover:shadow-md";
+                li.className = "task-item p-4 rounded-2xl border bg-white flex justify-between items-center border-slate-100 shadow-sm";
                 li.setAttribute('data-task', todo.task.toLowerCase());
-                
                 li.innerHTML = `
                     <div class="flex items-center gap-3">
                         <input type="checkbox" ${isDone ? 'checked' : ''} onchange="toggleStatus('${todo.id}', ${isDone})" class="w-4 h-4 cursor-pointer">
@@ -180,22 +215,18 @@
                                 <span class="category-dot" style="background: ${catInfo.color}"></span>
                                 <p class="text-sm font-bold text-slate-700">${todo.task}</p>
                             </div>
-                            <p class="text-[9px] text-blue-500 font-bold uppercase tracking-tighter">
-                                ${todo.date_from} TO ${todo.date_to} | ${todo.start_time || '--'} - ${todo.end_time || '--'}
-                            </p>
+                            <p class="text-[9px] text-blue-500 font-bold uppercase">${todo.date_from} | ${todo.start_time || '--'}</p>
                         </div>
                     </div>
-                    <button onclick="deleteTask('${todo.id}')" class="text-slate-200 hover:text-red-500 transition">✕</button>`;
+                    <button onclick="deleteTask('${todo.id}')" class="text-slate-200 hover:text-red-500">✕</button>`;
                 list.appendChild(li);
 
                 let endDate = new Date(todo.date_to);
                 endDate.setDate(endDate.getDate() + 1);
                 calendar.addEvent({
                     title: `[${todo.category}] ${todo.task}`,
-                    start: todo.date_from,
-                    end: endDate.toISOString().split('T')[0],
-                    backgroundColor: isDone ? '#cbd5e1' : catInfo.color,
-                    allDay: true
+                    start: todo.date_from, end: endDate.toISOString().split('T')[0],
+                    backgroundColor: isDone ? '#cbd5e1' : catInfo.color, allDay: true
                 });
             });
         }
@@ -203,31 +234,17 @@
         async function addTodo() {
             const task = document.getElementById('todo-input').value;
             const category = document.getElementById('category-select').value;
-            const dFrom = document.getElementById('date-from').value;
-            const dTo = document.getElementById('date-to').value;
-            const tStart = document.getElementById('start-time').value;
-            const tEnd = document.getElementById('end-time').value;
             const { data: { user } } = await supabaseClient.auth.getUser();
-
-            if (!task) return alert("Task name required");
+            if (!task) return alert("Task required");
 
             const { error } = await supabaseClient.from('todos').insert([{ 
-                task, category, date_from: dFrom, date_to: dTo, 
-                start_time: tStart || null, end_time: tEnd || null,
-                user_id: user.id, is_completed: false 
+                task, category, user_id: user.id, is_completed: false,
+                date_from: document.getElementById('date-from').value,
+                date_to: document.getElementById('date-to').value,
+                start_time: document.getElementById('start-time').value || null,
+                end_time: document.getElementById('end-time').value || null
             }]);
-            
-            if (!error) {
-                resetForm(); 
-                loadTodos();
-            }
-        }
-
-        function filterTasks() {
-            const q = document.getElementById('search-bar').value.toLowerCase();
-            document.querySelectorAll('.task-item').forEach(i => {
-                i.style.display = i.getAttribute('data-task').includes(q) ? 'flex' : 'none';
-            });
+            if (!error) { resetForm(); loadTodos(); }
         }
 
         async function toggleStatus(id, current) {
@@ -239,9 +256,27 @@
             if (confirm("Delete?")) { await supabaseClient.from('todos').delete().eq('id', id); loadTodos(); }
         }
 
+        async function createCategory() {
+            const name = document.getElementById('new-cat-name').value.trim();
+            const color = document.getElementById('new-cat-color').value;
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            if (name) {
+                await supabaseClient.from('categories').insert([{ name, color, user_id: user.id }]);
+                document.getElementById('new-cat-name').value = "";
+                loadCategories();
+            }
+        }
+
         async function deleteCategory(id) {
             await supabaseClient.from('categories').delete().eq('id', id);
             loadCategories(); loadTodos();
+        }
+
+        function filterTasks() {
+            const q = document.getElementById('search-bar').value.toLowerCase();
+            document.querySelectorAll('.task-item').forEach(i => {
+                i.style.display = i.getAttribute('data-task').includes(q) ? 'flex' : 'none';
+            });
         }
 
         async function handleLogout() { await supabaseClient.auth.signOut(); window.location.href = "index.html"; }
