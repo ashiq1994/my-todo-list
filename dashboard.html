@@ -35,9 +35,9 @@
             <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
                 <h2 class="text-[10px] font-black uppercase text-slate-400 mb-4 tracking-widest italic">Flag Management</h2>
                 <div class="flex gap-2 mb-4">
-                    <input type="text" id="new-cat-name" placeholder="Flag Name..." class="flex-1 p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500">
+                    <input type="text" id="new-cat-name" placeholder="Flag Name..." class="flex-1 p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none">
                     <input type="color" id="new-cat-color" value="#2563eb" class="w-12 h-12 p-1 bg-white border border-slate-200 rounded-xl cursor-pointer">
-                    <button onclick="createCategory()" class="bg-slate-800 text-white px-5 rounded-xl font-bold hover:bg-black transition">+</button>
+                    <button onclick="createCategory()" class="bg-slate-800 text-white px-5 rounded-xl font-bold">+</button>
                 </div>
                 <div id="category-tags" class="flex flex-wrap gap-2"></div>
             </div>
@@ -78,7 +78,7 @@
             <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
                 <div class="flex justify-between items-center mb-4">
                     <h2 class="font-bold text-slate-800 italic text-sm">Task List</h2>
-                    <input type="text" id="search-bar" onkeyup="filterTasks()" placeholder="Search tasks..." class="p-2 text-xs border border-slate-200 rounded-xl w-1/2 outline-none">
+                    <input type="text" id="search-bar" onkeyup="filterTasks()" placeholder="Search..." class="p-2 text-xs border border-slate-200 rounded-xl w-1/2 outline-none">
                 </div>
                 <ul id="todo-list" class="space-y-3 max-h-[300px] overflow-y-auto pr-2"></ul>
             </div>
@@ -103,13 +103,21 @@
             if (!user) return window.location.href = "index.html";
             document.getElementById('user-display').innerText = user.email;
             
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('date-from').value = today;
-            document.getElementById('date-to').value = today;
-
+            resetForm(); 
             setupCalendar();
             await loadCategories();
             await loadTodos();
+        }
+
+        // --- RESET LOGIC ---
+        function resetForm() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('todo-input').value = "";
+            document.getElementById('date-from').value = today;
+            document.getElementById('date-to').value = today;
+            document.getElementById('start-time').value = "";
+            document.getElementById('end-time').value = "";
+            document.getElementById('category-select').selectedIndex = 0;
         }
 
         function setupCalendar() {
@@ -161,7 +169,7 @@
                 const catInfo = categoriesList.find(c => c.name === todo.category) || { color: '#2563eb' };
                 const isDone = todo.is_completed;
                 const li = document.createElement('li');
-                li.className = "task-item p-4 rounded-2xl border bg-white flex justify-between items-center border-slate-100 shadow-sm";
+                li.className = "task-item p-4 rounded-2xl border bg-white flex justify-between items-center border-slate-100 shadow-sm transition hover:shadow-md";
                 li.setAttribute('data-task', todo.task.toLowerCase());
                 
                 li.innerHTML = `
@@ -203,14 +211,16 @@
 
             if (!task) return alert("Task name required");
 
-            await supabaseClient.from('todos').insert([{ 
+            const { error } = await supabaseClient.from('todos').insert([{ 
                 task, category, date_from: dFrom, date_to: dTo, 
                 start_time: tStart || null, end_time: tEnd || null,
                 user_id: user.id, is_completed: false 
             }]);
             
-            document.getElementById('todo-input').value = "";
-            loadTodos();
+            if (!error) {
+                resetForm(); 
+                loadTodos();
+            }
         }
 
         function filterTasks() {
