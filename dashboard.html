@@ -14,9 +14,8 @@
         .category-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
-        input[type="date"], input[type="time"], select { color-scheme: light; }
-        canvas { max-height: 180px !important; }
         .progress-fill { transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
+        canvas { max-height: 180px !important; }
     </style>
 </head>
 <body class="bg-[#f8fafc] min-h-screen font-sans text-slate-900">
@@ -32,17 +31,17 @@
         </div>
     </nav>
 
-    <main class="max-w-7xl mx-auto p-4 md:p-8 space-y-8">
+    <main class="max-w-7xl mx-auto p-4 md:p-8 space-y-6">
         
         <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
             <div class="flex justify-between items-end mb-2">
                 <div>
-                    <h2 class="text-[10px] font-black uppercase text-slate-400 tracking-widest italic">Daily Goal Progress</h2>
-                    <p id="progress-text" class="text-2xl font-black text-slate-800">0%</p>
+                    <h2 class="text-[10px] font-black uppercase text-slate-400 tracking-widest italic">Success Goal</h2>
+                    <p id="progress-text" class="text-3xl font-black text-slate-800">0%</p>
                 </div>
-                <p id="task-count-text" class="text-xs font-bold text-slate-400 uppercase">0 / 0 Tasks Completed</p>
+                <p id="task-count-text" class="text-[10px] font-bold text-slate-400 uppercase">0 / 0 Completed</p>
             </div>
-            <div class="w-full h-4 bg-slate-100 rounded-full overflow-hidden">
+            <div class="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
                 <div id="progress-bar" class="progress-fill h-full bg-gradient-to-r from-blue-500 to-indigo-600 w-0"></div>
             </div>
         </div>
@@ -50,9 +49,9 @@
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
             <div class="lg:col-span-4 space-y-6">
                 <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
-                    <h2 class="text-[10px] font-black uppercase text-slate-400 mb-4 tracking-widest italic">Flag Management</h2>
+                    <h2 class="text-[10px] font-black uppercase text-slate-400 mb-4 italic">Flags</h2>
                     <div class="flex gap-2 mb-4">
-                        <input type="text" id="new-cat-name" placeholder="Flag Name..." class="flex-1 p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none">
+                        <input type="text" id="new-cat-name" placeholder="Name..." class="flex-1 p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none">
                         <input type="color" id="new-cat-color" value="#2563eb" class="w-12 h-12 p-1 bg-white border border-slate-200 rounded-xl cursor-pointer">
                         <button onclick="createCategory()" class="bg-slate-800 text-white px-5 rounded-xl font-bold">+</button>
                     </div>
@@ -60,15 +59,15 @@
                 </div>
 
                 <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
-                    <h2 class="text-[10px] font-black uppercase text-slate-400 mb-4 tracking-widest italic">Schedule Task</h2>
+                    <h2 class="text-[10px] font-black uppercase text-slate-400 mb-4 italic">New Task</h2>
                     <div class="space-y-4">
-                        <input type="text" id="todo-input" placeholder="What's the task?" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500">
-                        <select id="category-select" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none"></select>
-                        <div class="grid grid-cols-2 gap-3">
+                        <input type="text" id="todo-input" placeholder="Task description..." class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500">
+                        <select id="category-select" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none cursor-pointer"></select>
+                        <div class="grid grid-cols-2 gap-2">
                             <input type="date" id="date-from" class="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl text-xs">
                             <input type="date" id="date-to" class="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl text-xs">
                         </div>
-                        <div class="grid grid-cols-2 gap-3">
+                        <div class="grid grid-cols-2 gap-2">
                             <input type="time" id="start-time" class="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl text-xs">
                             <input type="time" id="end-time" class="w-full p-2 bg-slate-50 border border-slate-200 rounded-xl text-xs">
                         </div>
@@ -78,7 +77,7 @@
 
                 <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
                     <div class="flex justify-between items-center mb-4">
-                        <h2 class="font-bold text-slate-800 italic text-sm">Task List</h2>
+                        <h2 class="font-bold text-slate-800 italic text-sm">List</h2>
                         <input type="text" id="search-bar" onkeyup="filterTasks()" placeholder="Search..." class="p-2 text-xs border border-slate-200 rounded-xl w-1/2 outline-none">
                     </div>
                     <ul id="todo-list" class="space-y-3 max-h-[300px] overflow-y-auto pr-2"></ul>
@@ -88,11 +87,11 @@
             <div class="lg:col-span-8 space-y-6">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
-                        <h2 class="text-[10px] font-black uppercase text-slate-400 mb-4 tracking-widest italic text-center">Completion Status</h2>
+                        <h2 class="text-[10px] font-black uppercase text-slate-400 mb-4 text-center italic">Completion</h2>
                         <canvas id="statusChart"></canvas>
                     </div>
                     <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
-                        <h2 class="text-[10px] font-black uppercase text-slate-400 mb-4 tracking-widest italic text-center">Tasks per Flag</h2>
+                        <h2 class="text-[10px] font-black uppercase text-slate-400 mb-4 text-center italic">Activity</h2>
                         <canvas id="categoryChart"></canvas>
                     </div>
                 </div>
@@ -122,6 +121,7 @@
             await loadTodos();
         }
 
+        // AUTO-RESET LOGIC
         function resetForm() {
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('todo-input').value = "";
@@ -167,12 +167,10 @@
             const total = todos.length;
             const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
 
-            // Update Progress Bar
             document.getElementById('progress-bar').style.width = `${percentage}%`;
             document.getElementById('progress-text').innerText = `${percentage}%`;
-            document.getElementById('task-count-text').innerText = `${completed} / ${total} Tasks Completed`;
+            document.getElementById('task-count-text').innerText = `${completed} / ${total} Tasks`;
 
-            // Update Status Chart
             if (statusChart) statusChart.destroy();
             statusChart = new Chart(document.getElementById('statusChart'), {
                 type: 'doughnut',
@@ -180,10 +178,9 @@
                     labels: ['Done', 'Pending'],
                     datasets: [{ data: [completed, total - completed], backgroundColor: ['#10b981', '#f1f5f9'], borderWidth: 0 }]
                 },
-                options: { cutout: '70%', plugins: { legend: { position: 'bottom' } } }
+                options: { cutout: '75%', plugins: { legend: { position: 'bottom' } } }
             });
 
-            // Update Bar Chart
             const catCounts = {};
             todos.forEach(t => catCounts[t.category] = (catCounts[t.category] || 0) + 1);
             if (categoryChart) categoryChart.destroy();
@@ -191,7 +188,7 @@
                 type: 'bar',
                 data: {
                     labels: Object.keys(catCounts),
-                    datasets: [{ label: 'Tasks', data: Object.values(catCounts), backgroundColor: '#6366f1', borderRadius: 6 }]
+                    datasets: [{ label: 'Tasks', data: Object.values(catCounts), backgroundColor: '#6366f1', borderRadius: 4 }]
                 },
                 options: { scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }, plugins: { legend: { display: false } } }
             });
@@ -253,7 +250,7 @@
         }
 
         async function deleteTask(id) {
-            if (confirm("Delete?")) { await supabaseClient.from('todos').delete().eq('id', id); loadTodos(); }
+            if (confirm("Delete task?")) { await supabaseClient.from('todos').delete().eq('id', id); loadTodos(); }
         }
 
         async function createCategory() {
